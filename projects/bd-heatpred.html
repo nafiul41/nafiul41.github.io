@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BD-HeatPred — Nafiul Islam Naim</title>
+    <meta
+      name="description"
+      content="BD-HeatPred: a daily, multi-source predictor dataset for pre-monsoon heatwaves in five regions of Bangladesh, 1991–2025 (in preparation)."
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;500;600&display=swap"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+    <style>
+      /* Page-specific additions; colours come from styles.css */
+      .meta {
+        color: var(--text-secondary);
+        line-height: 1.7;
+      }
+      .status {
+        border-left: 3px solid var(--accent-color);
+        padding: 0.75rem 1rem;
+        margin: 1.5rem 0;
+        background: rgba(74, 116, 185, 0.06);
+        border-radius: 0 6px 6px 0;
+      }
+      .status p {
+        margin: 0.3rem 0;
+      }
+      .glance {
+        display: grid;
+        grid-template-columns: max-content 1fr;
+        gap: 0.45rem 1.25rem;
+        margin: 1rem 0;
+      }
+      .glance dt {
+        font-weight: 600;
+      }
+      .glance dd {
+        margin: 0;
+        color: var(--text-secondary);
+      }
+      @media (max-width: 600px) {
+        .glance {
+          grid-template-columns: 1fr;
+          gap: 0.1rem;
+        }
+        .glance dd {
+          margin-bottom: 0.6rem;
+        }
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 1rem 0 0.5rem;
+        font-size: 0.88rem;
+      }
+      th,
+      td {
+        border-bottom: 1px solid var(--border-color);
+        padding: 0.45rem 0.6rem;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        font-weight: 600;
+      }
+      code {
+        font-size: 0.85em;
+        background: rgba(127, 127, 127, 0.1);
+        padding: 0.05rem 0.3rem;
+        border-radius: 3px;
+      }
+      .note {
+        font-size: 0.88rem;
+        color: var(--text-secondary);
+      }
+      main li {
+        margin-bottom: 0.4rem;
+      }
+      details {
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 0.6rem 0.9rem;
+        margin: 0.6rem 0;
+      }
+      details[open] {
+        padding-bottom: 0.9rem;
+      }
+      summary {
+        cursor: pointer;
+        font-weight: 500;
+        color: var(--accent-color);
+      }
+      details.faq summary {
+        color: var(--text-color);
+      }
+      details p:last-child {
+        margin-bottom: 0;
+      }
+      h3 {
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin: 1.4rem 0 0.5rem;
+      }
+      ol.pipeline {
+        padding-left: 1.4rem;
+      }
+      ol.pipeline li {
+        margin-bottom: 0.7rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-content">
+        <a href="../index.html">&larr; Back to homepage</a>
+        <h1>
+          BD-HeatPred: A Multi-Source Daily Predictor Dataset for Pre-Monsoon
+          Heatwaves in Bangladesh, 1991&ndash;2025
+        </h1>
+        <p class="meta">
+          <a href="../index.html">Nafiul Islam Naim</a> |
+          <!-- TODO: replace # with Tawyabul Islam Tamim's website URL -->
+          <a href="#" target="_blank">Tawyabul Islam Tamim</a> |
+          <a
+            href="https://www.du.ac.bd/faculty/faculty_details/APMAT/59354"
+            target="_blank"
+            >Suchi Chaki</a
+          >
+        </p>
+      </div>
+    </header>
+
+    <main>
+      <section id="overview">
+        <div class="status">
+          <p>
+            <strong>Status:</strong> the dataset has been assembled, and quality
+            control and technical validation are in progress. It is not yet
+            publicly released. This page will be updated with download and
+            citation details at release.
+          </p>
+        </div>
+
+        <h2>Overview</h2>
+        <p>
+          BD-HeatPred is a daily dataset for studying and predicting
+          <strong>pre-monsoon heatwaves in Bangladesh</strong>. For each of five
+          climatically distinct regions, it brings together 35 atmospheric,
+          land-surface, ocean and climate-mode variables from seven source
+          products. They are aligned to one daily calendar, alongside a heatwave
+          label based on the Bangladesh Meteorological Department (BMD)
+          definition.
+        </p>
+
+        <h3>Dataset at a glance</h3>
+        <dl class="glance">
+          <dt>Regions</dt>
+          <dd>
+            Dhaka, Khulna, Rajshahi and Rangpur divisions, and the Rangamati,
+            Bandarban and Khagrachari hill districts (RBK). Ocean variables
+            cover the Bay of Bengal (80&ndash;95&deg;E, 5&ndash;22.5&deg;N).
+          </dd>
+          <dt>Period</dt>
+          <dd>1991&ndash;2025 (35 seasons)</dd>
+          <dt>Season window</dt>
+          <dd>
+            1 February &ndash; 30 June each year, spanning the pre-monsoon heat
+            season and the monsoon onset
+          </dd>
+          <dt>Temporal resolution</dt>
+          <dd>Daily (local day, UTC+6), built from hourly data where needed</dd>
+          <dt>Spatial resolution</dt>
+          <dd>
+            Regional area means, computed from source grids of 0.1&deg; to
+            2.5&deg;
+          </dd>
+          <dt>Variables</dt>
+          <dd>35 predictors + 1 heatwave label</dd>
+          <dt>Size</dt>
+          <dd>5,259 daily records per region</dd>
+          <dt>Data sources</dt>
+          <dd>7 products (reanalysis, satellite and climate-index data)</dd>
+          <dt>Format</dt>
+          <dd>CSV, one file per region</dd>
+        </dl>
+      </section>
+
+      <section id="why">
+        <h2>Why this dataset?</h2>
+        <p>
+          Pre-monsoon heatwaves are a serious hazard in Bangladesh. April and
+          May are the hottest months, and daily maxima of
+          36&ndash;40&nbsp;&deg;C are common in the northwest and southwest.
+          Heatwaves are linked to several processes: dry air and subsidence
+          aloft, dry soils, moisture transport from the Bay of Bengal, and
+          large-scale modes such as the MJO and the Indian Ocean Dipole.
+        </p>
+        <p>
+          The data needed to study these processes together are scattered. They
+          sit in different archives (reanalyses, satellite records, index
+          products) with different grids, time steps, time zones and file
+          formats. Each research group has to download, clip, align and derive
+          the variables again. That takes effort, adds room for error, and makes
+          results hard to compare or reproduce.
+        </p>
+        <p>
+          BD-HeatPred does this preparation once, with documented steps. It
+          provides analysis-ready daily tables for each region, all on the same
+          calendar and window, with a heatwave label.
+        </p>
+      </section>
+
+      <section id="new">
+        <h2>What's new</h2>
+        <ul>
+          <li>
+            <strong>One aligned table from seven sources.</strong> Atmosphere,
+            land surface, Bay of Bengal ocean conditions and climate modes share
+            a single daily calendar for each region.
+          </li>
+          <li>
+            <strong>Built for heatwaves.</strong> Variables were chosen from the
+            literature on Bangladesh heatwaves and cover heat, dryness,
+            circulation, land&ndash;atmosphere coupling and remote drivers. The
+            February&ndash;June window brackets the heat season.
+          </li>
+          <li>
+            <strong>Regional, not national.</strong> Five regions with different
+            climates are kept separate, so regional differences in heatwave
+            drivers can be studied.
+          </li>
+          <li>
+            <strong>Physically derived predictors.</strong> Vapour-pressure
+            deficit, 850&nbsp;hPa wind speed, moisture-flux convergence and
+            temperature advection are computed from hourly fields, with daily
+            mean, minimum and maximum. VPD is computed hourly because it depends
+            non-linearly on temperature, so a daily mean of hourly values
+            differs from VPD computed from daily-mean inputs.
+          </li>
+          <li>
+            <strong>Daily vegetation and water indices.</strong> NDVI and NDWI
+            observations are only available every few days. They are
+            reconstructed to daily values with a weighted Whittaker smoother.
+          </li>
+          <li>
+            <strong>Anomalies on a standard base period.</strong> Anomalies of
+            Bay of Bengal OLR and SST, and the Dipole Mode Index, use the WMO
+            1991&ndash;2020 climate normal.
+          </li>
+          <li>
+            <strong>A heatwave label and a validation framework.</strong> The
+            label follows the BMD definition. A structured quality-control and
+            validation framework is being applied before release.
+          </li>
+        </ul>
+      </section>
+
+      <section id="variables">
+        <h2>Variables</h2>
+        <p>The 35 predictors fall into eight groups.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Group</th>
+                <th>Variables</th>
+                <th>Scale</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Tropospheric temperature</td>
+                <td>Temperature at 850 and 500&nbsp;hPa</td>
+                <td>Regional</td>
+              </tr>
+              <tr>
+                <td>Humidity</td>
+                <td>Relative and specific humidity at 850 and 700&nbsp;hPa</td>
+                <td>Regional</td>
+              </tr>
+              <tr>
+                <td>Evaporative demand (derived)</td>
+                <td>Vapour-pressure deficit: daily mean, min, max</td>
+                <td>Regional</td>
+              </tr>
+              <tr>
+                <td>Circulation</td>
+                <td>
+                  Wind components at 850 and 200&nbsp;hPa, 500&nbsp;hPa
+                  geopotential, 500&nbsp;hPa vertical velocity
+                </td>
+                <td>Regional</td>
+              </tr>
+              <tr>
+                <td>Transport diagnostics (derived)</td>
+                <td>
+                  850&nbsp;hPa wind speed, moisture-flux convergence and
+                  temperature advection: daily mean, min, max each
+                </td>
+                <td>Regional</td>
+              </tr>
+              <tr>
+                <td>Land surface</td>
+                <td>Surface soil moisture (0&ndash;7&nbsp;cm), NDVI, NDWI</td>
+                <td>Regional</td>
+              </tr>
+              <tr>
+                <td>Bay of Bengal ocean &amp; convection</td>
+                <td>SST and SST anomaly, OLR and OLR anomaly</td>
+                <td>Basin</td>
+              </tr>
+              <tr>
+                <td>Climate modes</td>
+                <td>MJO (RMM1, RMM2, amplitude), Dipole Mode Index</td>
+                <td>Global / basin</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">
+          27 variables differ by region. The 8 basin- and global-scale variables
+          are identical in every regional file.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

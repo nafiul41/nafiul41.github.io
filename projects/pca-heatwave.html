@@ -1,0 +1,729 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PCA and Its Applications — Nafiul Islam Naim</title>
+    <meta
+      name="description"
+      content="Principal Component Analysis and Its Applications: the theory of PCA and an interpretable mRMR–PCA machine-learning framework for predicting annual heat wave days in Bangladesh's eight divisions (1940–2025)."
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;500;600&display=swap"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+    <style>
+      /* Page-specific additions; colours come from styles.css */
+      .meta {
+        color: var(--text-secondary);
+        line-height: 1.7;
+      }
+      .status {
+        border-left: 3px solid var(--accent-color);
+        padding: 0.75rem 1rem;
+        margin: 1.5rem 0;
+        background: rgba(74, 116, 185, 0.06);
+        border-radius: 0 6px 6px 0;
+      }
+      .status p {
+        margin: 0.3rem 0;
+      }
+      .glance {
+        display: grid;
+        grid-template-columns: max-content 1fr;
+        gap: 0.45rem 1.25rem;
+        margin: 1rem 0;
+      }
+      .glance dt {
+        font-weight: 600;
+      }
+      .glance dd {
+        margin: 0;
+        color: var(--text-secondary);
+      }
+      @media (max-width: 600px) {
+        .glance {
+          grid-template-columns: 1fr;
+          gap: 0.1rem;
+        }
+        .glance dd {
+          margin-bottom: 0.6rem;
+        }
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 1rem 0 0.5rem;
+        font-size: 0.88rem;
+      }
+      th,
+      td {
+        border-bottom: 1px solid var(--border-color);
+        padding: 0.45rem 0.6rem;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        font-weight: 600;
+      }
+      td.num,
+      th.num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      code {
+        font-size: 0.85em;
+        background: rgba(127, 127, 127, 0.1);
+        padding: 0.05rem 0.3rem;
+        border-radius: 3px;
+      }
+      .note {
+        font-size: 0.88rem;
+        color: var(--text-secondary);
+      }
+      main li {
+        margin-bottom: 0.4rem;
+      }
+      details {
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 0.6rem 0.9rem;
+        margin: 0.6rem 0;
+      }
+      details[open] {
+        padding-bottom: 0.9rem;
+      }
+      summary {
+        cursor: pointer;
+        font-weight: 500;
+        color: var(--accent-color);
+      }
+      details.faq summary {
+        color: var(--text-color);
+      }
+      details p:last-child {
+        margin-bottom: 0;
+      }
+      h3 {
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin: 1.4rem 0 0.5rem;
+      }
+      ol.pipeline {
+        padding-left: 1.4rem;
+      }
+      ol.pipeline li {
+        margin-bottom: 0.7rem;
+      }
+      .eq {
+        text-align: center;
+        margin: 0.8rem 0;
+        font-style: italic;
+      }
+      figure {
+        margin: 1.2rem 0;
+      }
+      figure img {
+        max-width: 100%;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+      }
+      figcaption {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 0.4rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-content">
+        <a href="../index.html">&larr; Back to homepage</a>
+        <h1>Principal Component Analysis and Its Applications</h1>
+        <p class="meta">
+          Nafiul Islam Naim &middot; Undergraduate project (AMTH 460),
+          Department of Applied Mathematics, University of Dhaka &middot;
+          Supervisor:
+          <a href="https://www.du.ac.bd/faculty/faculty_details/APMAT/59354"
+            >Suchi Chaki</a
+          >
+          &middot; Status: <strong>Ongoing</strong>
+        </p>
+      </div>
+    </header>
+
+    <nav>
+      <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#theory">Theory</a></li>
+        <li><a href="#example">Worked example</a></li>
+        <li><a href="#data">Data</a></li>
+        <li><a href="#method">Method</a></li>
+        <li><a href="#results">Results</a></li>
+        <li><a href="#drivers">Drivers</a></li>
+        <li><a href="#limitations">Limitations</a></li>
+        <li><a href="#resources">Resources</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <section id="overview">
+        <div class="status">
+          <p>
+            <strong>Status:</strong> ongoing undergraduate project. The full
+            report is available as a PDF, and the code is on GitHub. See
+            <a href="#resources">Resources</a>.
+          </p>
+        </div>
+
+        <h2>Overview</h2>
+        <p>
+          This project has two parts. The first part covers the
+          <strong>theory of Principal Component Analysis (PCA)</strong>: why
+          the principal components are the eigenvectors of the covariance
+          matrix, how to choose how many to keep, and where PCA works well or
+          badly. The second part <strong>applies PCA to a real climate
+          problem</strong>: predicting the number of annual Heat Wave Days
+          (HWDs) in each of Bangladesh's eight administrative divisions from
+          ERA5 reanalysis data for 1940&ndash;2025.
+        </p>
+        <p>
+          The prediction framework combines mRMR feature selection, PCA, six
+          regression models and SHAP explanations. It makes predictions from
+          compressed features and also shows which atmospheric variables drive
+          heat waves in each division.
+        </p>
+
+        <h3>Project at a glance</h3>
+        <dl class="glance">
+          <dt>Study area</dt>
+          <dd>
+            Bangladesh's eight divisions: Dhaka, Chittagong, Rajshahi, Khulna,
+            Barishal, Sylhet, Rangpur and Mymensingh
+          </dd>
+          <dt>Period</dt>
+          <dd>
+            1940&ndash;2025. Training 1940&ndash;2008, testing 2009&ndash;2025
+          </dd>
+          <dt>Season</dt>
+          <dd>Pre-monsoon, March&ndash;May</dd>
+          <dt>Data</dt>
+          <dd>
+            ERA5 hourly reanalysis at 0.25&deg;, from 197 land grid points
+          </dd>
+          <dt>Predictors</dt>
+          <dd>28 (7 atmospheric variables &times; 4 pressure levels)</dd>
+          <dt>Target</dt>
+          <dd>Annual Heat Wave Days per division</dd>
+          <dt>Pipeline</dt>
+          <dd>
+            mRMR selection (Top-10 / 15 / 20) &rarr; PCA (95% variance) &rarr;
+            6 regression models &rarr; SHAP
+          </dd>
+          <dt>Best setup</dt>
+          <dd>Ridge Regression on PCA features from the Top-20 mRMR variables</dd>
+        </dl>
+      </section>
+
+      <section id="theory">
+        <h2>The theory of PCA</h2>
+        <p>
+          PCA turns many correlated variables into a smaller set of new,
+          uncorrelated variables called <em>principal components</em>. Each
+          component is a weighted combination of the original variables, and
+          the components are ordered by how much of the data's variance they
+          capture. The method goes back to Karl Pearson (1901), and Harold
+          Hotelling named it in 1933.
+        </p>
+
+        <h3>Why the answer is an eigenvector</h3>
+        <p>
+          Project each mean-centred observation <b>x</b><sub>i</sub> onto a unit
+          direction <b>w</b>, giving the score z<sub>i</sub> =
+          <b>w</b><sup>&#8868;</sup><b>x</b><sub>i</sub>. The variance of these
+          scores is
+        </p>
+        <p class="eq">
+          Var(z) = <b>w</b><sup>&#8868;</sup>&Sigma;<b>w</b>, &nbsp;subject to
+          <b>w</b><sup>&#8868;</sup><b>w</b> = 1
+        </p>
+        <p>
+          where &Sigma; is the covariance matrix. Maximising this with a
+          Lagrange multiplier gives
+        </p>
+        <p class="eq">&Sigma;<b>w</b> = &lambda;<b>w</b></p>
+        <p>
+          so the best direction is an eigenvector of &Sigma;, and the variance
+          along it equals its eigenvalue &lambda;. Writing any unit vector in
+          the eigenvector basis shows that the variance can never exceed the
+          largest eigenvalue &lambda;<sub>1</sub>. That maximum is reached only
+          at its eigenvector <b>v</b><sub>1</sub>, the first principal
+          component. Each following component captures the most remaining
+          variance while staying orthogonal to the earlier ones.
+        </p>
+
+        <h3>The steps</h3>
+        <ol class="pipeline">
+          <li>Standardise each feature: z = (x &minus; &mu;) / &sigma;.</li>
+          <li>Compute the covariance matrix &Sigma; = Z<sup>&#8868;</sup>Z / (n &minus; 1).</li>
+          <li>Find its eigenvalues and eigenvectors, &Sigma;V = V&Lambda;.</li>
+          <li>Sort them so that &lambda;<sub>1</sub> &ge; &lambda;<sub>2</sub> &ge; &hellip; &ge; &lambda;<sub>p</sub>.</li>
+          <li>Keep the top k eigenvectors, V<sub>k</sub>.</li>
+          <li>Project the data: Y = Z V<sub>k</sub>, reducing p features to k.</li>
+        </ol>
+
+        <h3>How many components to keep</h3>
+        <ul>
+          <li>
+            <strong>Explained variance ratio:</strong> the share of total
+            variance each component captures, &lambda;<sub>i</sub> /
+            &Sigma;&lambda;<sub>j</sub>.
+          </li>
+          <li>
+            <strong>Cumulative explained variance:</strong> keep enough
+            components to reach a target, such as 95%. This project uses that
+            rule.
+          </li>
+          <li>
+            <strong>Scree plot:</strong> stop at the "elbow", where adding
+            components stops helping much.
+          </li>
+          <li>
+            <strong>Kaiser criterion:</strong> keep components with eigenvalue
+            greater than 1.
+          </li>
+        </ul>
+
+        <h3>Strengths and weaknesses</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Strengths</th>
+                <th>Weaknesses</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Reduces the number of dimensions while keeping most of the variance</td>
+                <td>Eigen- or SVD decomposition is costly for very large datasets</td>
+              </tr>
+              <tr>
+                <td>Removes multicollinearity: the components are uncorrelated</td>
+                <td>Sensitive to outliers, because it relies on the covariance matrix</td>
+              </tr>
+              <tr>
+                <td>Lets high-dimensional data be plotted in 2D or 3D</td>
+                <td>Unsupervised: it ignores the target variable</td>
+              </tr>
+              <tr>
+                <td>Fast, with nothing to tune</td>
+                <td>Linear only; non-linear structure needs Kernel PCA or t-SNE</td>
+              </tr>
+              <tr>
+                <td>Filters noise by dropping low-variance components</td>
+                <td>Components mix the original variables and are hard to interpret</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">
+          The report also covers a geometric example (bean shape features
+          rotated onto principal axes) and PCA's uses in computer vision,
+          finance, genomics, and weather and climate science.
+        </p>
+      </section>
+
+      <section id="example">
+        <h2>A worked example</h2>
+        <p>
+          Before the full climate data, the report runs PCA by hand on six days
+          of synthetic weather data with three features: temperature,
+          relative humidity and wind speed.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Component</th>
+                <th class="num">Eigenvalue</th>
+                <th class="num">Explained variance</th>
+                <th class="num">Cumulative</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>PC1</td>
+                <td class="num">61.433</td>
+                <td class="num">92.99%</td>
+                <td class="num">92.99%</td>
+              </tr>
+              <tr>
+                <td>PC2</td>
+                <td class="num">3.759</td>
+                <td class="num">5.69%</td>
+                <td class="num">98.68%</td>
+              </tr>
+              <tr>
+                <td>PC3</td>
+                <td class="num">0.875</td>
+                <td class="num">1.33%</td>
+                <td class="num">100%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          The first two components keep 98.7% of the variance, so the three
+          features can be replaced by two. PC1 is mostly humidity (loading
+          0.913), with wind speed on the same side and temperature opposite: a
+          combined moisture-and-wind axis. PC2 is mostly wind speed (0.931).
+          The climate model applies the same idea to much larger sets of
+          pressure-level variables.
+        </p>
+      </section>
+
+      <section id="data">
+        <h2>Data</h2>
+        <p>
+          The application uses <strong>ERA5</strong>, ECMWF's global
+          reanalysis, downloaded through the Copernicus Climate Data Store at
+          0.25&deg; &times; 0.25&deg;. ERA5 was chosen over station records
+          because it covers every part of the country with no gaps, back to
+          1940. Of 594 grid points in the 88&deg;&ndash;92.5&deg;E,
+          20.5&deg;&ndash;26.5&deg;N box, 197 fall on land in Bangladesh, and
+          each was assigned to a division.
+        </p>
+
+        <h3>Predictors</h3>
+        <p>
+          Seven variables at four pressure levels (1000, 850, 500 and
+          300&nbsp;hPa), averaged over March&ndash;May for each division and
+          year, give 28 predictors.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Variable</th>
+                <th>Why it matters for heat waves</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Temperature</td>
+                <td>Air temperature (t)</td>
+                <td>Directly sets heat-wave occurrence and intensity</td>
+              </tr>
+              <tr>
+                <td>Moisture</td>
+                <td>Relative humidity (r), specific humidity (q)</td>
+                <td>Controls evaporative cooling and heat stress</td>
+              </tr>
+              <tr>
+                <td>Circulation</td>
+                <td>Zonal and meridional wind (u, v)</td>
+                <td>Transport of hot or dry air, and weak ventilation</td>
+              </tr>
+              <tr>
+                <td>Vertical motion</td>
+                <td>Vertical velocity (w)</td>
+                <td>Sinking air suppresses cloud and lets the sun heat the surface</td>
+              </tr>
+              <tr>
+                <td>Pressure pattern</td>
+                <td>Geopotential (z)</td>
+                <td>Upper-air ridges bring stable, persistent hot weather</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Target: Heat Wave Days</h3>
+        <p>
+          The label follows the Bangladesh Meteorological Department (BMD)
+          definition, adapted to a grid. A day is <em>hot</em> in a division
+          when at least 50% of its grid cells have a daily maximum temperature
+          above 36&nbsp;&deg;C. Three or more hot days in a row make a heat
+          wave. The heat-wave days in March&ndash;May are summed to give each
+          division's annual HWD count.
+        </p>
+      </section>
+
+      <section id="method">
+        <h2>Method</h2>
+        <ol class="pipeline">
+          <li>
+            <strong>Preprocessing.</strong> ERA5 grid points were clipped to
+            Bangladesh, assigned to divisions, and averaged into one value per
+            variable, pressure level, division and year.
+          </li>
+          <li>
+            <strong>Split by time.</strong> 1940&ndash;2008 for training and
+            2009&ndash;2025 for testing, so the models are tested on years they
+            have not seen.
+          </li>
+          <li>
+            <strong>Feature selection (mRMR).</strong> Minimum Redundancy
+            Maximum Relevance ranked the 28 features by how much they tell about
+            HWDs without repeating each other. The top 10, 15 and 20 formed
+            three subsets.
+          </li>
+          <li>
+            <strong>Feature extraction (PCA).</strong> PCA was applied to each
+            subset separately, keeping enough components for 95% of the
+            variance. This gave three feature sets: PCA (mRMR-10), PCA
+            (mRMR-15) and PCA (mRMR-20).
+          </li>
+          <li>
+            <strong>Models.</strong> Six regression models were trained on each
+            feature set: Linear, Ridge, Lasso and Elastic Net regression,
+            Gaussian Process Regression, and a Multi-Layer Perceptron (one
+            hidden layer of 8 ReLU neurons, Adam, L2 = 0.001, early stopping).
+          </li>
+          <li>
+            <strong>Evaluation.</strong> Mean Absolute Error (MAE), Root Mean
+            Squared Error (RMSE) and the correlation coefficient (CC) between
+            observed and predicted HWDs.
+          </li>
+          <li>
+            <strong>Interpretation (SHAP).</strong> SHAP values were computed
+            for the chosen model, using the original Top-20 variables so that
+            each contribution has a physical meaning.
+          </li>
+        </ol>
+      </section>
+
+      <section id="results">
+        <h2>Results</h2>
+
+        <h3>Where heat waves happen</h3>
+        <p>
+          Heat waves follow a clear <strong>west-to-east gradient</strong>.
+          Rajshahi and Khulna, in the drier west, have the most heat-wave days.
+          Sylhet, Chittagong and Barishal, near the Bay of Bengal and the hills,
+          have the fewest.
+        </p>
+        <figure>
+          <img
+            src="../images/thumbs/pca hwds.png"
+            alt="Map of average annual heat wave days across Bangladesh's divisions"
+          />
+          <figcaption>
+            Average annual heat wave days across Bangladesh's divisions,
+            1940&ndash;2025.
+          </figcaption>
+        </figure>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Division</th>
+                <th class="num">Mean HWDs</th>
+                <th class="num">Std. dev.</th>
+                <th class="num">Max</th>
+                <th class="num">Trend (days/decade)</th>
+                <th class="num">p-value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Rajshahi</td><td class="num">19.49</td><td class="num">15.08</td><td class="num">66</td><td class="num">&minus;1.02</td><td class="num">0.12</td></tr>
+              <tr><td>Khulna</td><td class="num">18.08</td><td class="num">15.92</td><td class="num">68</td><td class="num">&minus;1.44</td><td class="num">0.036*</td></tr>
+              <tr><td>Rangpur</td><td class="num">9.50</td><td class="num">9.92</td><td class="num">50</td><td class="num">0.06</td><td class="num">0.893</td></tr>
+              <tr><td>Dhaka</td><td class="num">8.27</td><td class="num">10.69</td><td class="num">58</td><td class="num">&minus;0.80</td><td class="num">0.085</td></tr>
+              <tr><td>Mymensingh</td><td class="num">4.81</td><td class="num">8.44</td><td class="num">54</td><td class="num">&minus;0.75</td><td class="num">0.039*</td></tr>
+              <tr><td>Barishal</td><td class="num">2.24</td><td class="num">5.07</td><td class="num">28</td><td class="num">&minus;0.13</td><td class="num">0.56</td></tr>
+              <tr><td>Chittagong</td><td class="num">1.80</td><td class="num">4.82</td><td class="num">22</td><td class="num">0.30</td><td class="num">0.147</td></tr>
+              <tr><td>Sylhet</td><td class="num">1.06</td><td class="num">3.90</td><td class="num">26</td><td class="num">&minus;0.25</td><td class="num">0.139</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">
+          * Significant at the 0.05 level. The minimum is 0 in every division.
+        </p>
+
+        <h3>How it changed over time</h3>
+        <ul>
+          <li>
+            <strong>1957</strong> was the worst year on record in seven of the
+            eight divisions: a single, country-wide heat wave.
+          </li>
+          <li>
+            <strong>No division shows a significant increase</strong> over
+            1940&ndash;2025. Khulna and Mymensingh show significant decreases;
+            elsewhere year-to-year variation dominates.
+          </li>
+          <li>
+            Chittagong has few heat-wave days historically but has risen since
+            2020, peaking in 2023.
+          </li>
+        </ul>
+
+        <h3>Which model worked best</h3>
+        <ul>
+          <li>
+            <strong>The four linear models</strong> (Linear, Ridge, Lasso,
+            Elastic Net) gave almost identical errors. This suggests PCA had
+            already removed the multicollinearity that regularisation would
+            otherwise fix.
+          </li>
+          <li>
+            <strong>Ridge Regression</strong> had slightly lower errors and was
+            the most stable across divisions, so it was chosen for
+            interpretation.
+          </li>
+          <li>
+            <strong>More selected features helped.</strong> Ridge's average MAE
+            fell from 4.55 days (Top-10) to 4.23 (Top-15) and 4.08 (Top-20).
+          </li>
+          <li>
+            <strong>GPR and the MLP were inconsistent.</strong> They won in a few
+            divisions (the MLP in Mymensingh and Sylhet) but did worse
+            elsewhere. With only one sample per year, there was too little data
+            for them to train reliably.
+          </li>
+        </ul>
+        <p>
+          Ridge Regression on PCA (mRMR-20), test period 2009&ndash;2025:
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Division</th>
+                <th class="num">MAE (days)</th>
+                <th class="num">RMSE (days)</th>
+                <th class="num">CC</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Barishal</td><td class="num">3.87</td><td class="num">6.03</td><td class="num">0.50</td></tr>
+              <tr><td>Chittagong</td><td class="num">4.68</td><td class="num">7.86</td><td class="num">0.68</td></tr>
+              <tr><td>Dhaka</td><td class="num">3.69</td><td class="num">5.66</td><td class="num">0.87</td></tr>
+              <tr><td>Khulna</td><td class="num">6.61</td><td class="num">7.74</td><td class="num">0.83</td></tr>
+              <tr><td>Mymensingh</td><td class="num">2.48</td><td class="num">3.27</td><td class="num">0.87</td></tr>
+              <tr><td>Rajshahi</td><td class="num">6.19</td><td class="num">7.58</td><td class="num">0.89</td></tr>
+              <tr><td>Rangpur</td><td class="num">3.68</td><td class="num">5.12</td><td class="num">0.83</td></tr>
+              <tr><td>Sylhet</td><td class="num">1.47</td><td class="num">1.78</td><td class="num">0.57</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">
+          Errors are largest in Rajshahi and Khulna, which also have the most
+          heat-wave days and the most variation. Rajshahi, Dhaka and
+          Mymensingh track the observed year-to-year pattern most closely.
+          Sylhet's errors are small in days, but its correlation is lower.
+        </p>
+        <details>
+          <summary>View the full results for all six models and three feature sets</summary>
+          <p>
+            Tables 4.6&ndash;4.8 of the <a href="../files/report.pdf" target="_blank">report</a>
+            list MAE, RMSE and CC for every model, division and feature set.
+            MAE heatmaps comparing them are in Figure 4.11.
+          </p>
+        </details>
+      </section>
+
+      <section id="drivers">
+        <h2>What drives heat waves (SHAP)</h2>
+        <p>
+          SHAP assigns each variable a share of every prediction, based on
+          Shapley values from game theory. It shows which conditions push a
+          year's predicted heat-wave count up or down.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Division</th>
+                <th>Top contributing variables</th>
+                <th>SHAP influence</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Barishal</td><td><code>shum_P1000</code>, <code>temp_P850</code>, <code>shum_P850</code></td><td>Moderate to high</td></tr>
+              <tr><td>Chittagong</td><td><code>shum_P1000</code>, <code>shum_P850</code>, <code>shum_P500</code></td><td>Moderate</td></tr>
+              <tr><td>Dhaka</td><td><code>shum_P1000</code>, <code>temp_P850</code>, <code>zpt_P1000</code></td><td>Very high (&asymp; &minus;11 to +8)</td></tr>
+              <tr><td>Khulna</td><td><code>shum_P1000</code>, <code>zpt_P1000</code>, <code>temp_P850</code></td><td>Highest (&asymp; &minus;12 to +12)</td></tr>
+              <tr><td>Mymensingh</td><td><code>shum_P1000</code>, <code>temp_P850</code>, <code>uwnd_P1000</code></td><td>High</td></tr>
+              <tr><td>Rajshahi</td><td><code>zpt_P850</code>, <code>temp_P300</code>, <code>temp_P850</code></td><td>High</td></tr>
+              <tr><td>Rangpur</td><td><code>shum_P1000</code>, <code>temp_P850</code>, <code>temp_P300</code></td><td>High</td></tr>
+              <tr><td>Sylhet</td><td><code>vvel_P850</code>, <code>temp_P850</code>, <code>shum_P1000</code></td><td>Moderate</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li>
+            <strong>Dry air near the ground is the main driver in six
+            divisions.</strong> In Barishal, Chittagong, Dhaka, Khulna,
+            Mymensingh and Rangpur, the top variable is specific humidity at
+            1000&nbsp;hPa. Lower humidity means more heat-wave days, because
+            dry air reduces evaporative cooling and heats the surface more.
+          </li>
+          <li>
+            <strong>Rajshahi is driven by large-scale circulation.</strong>
+            Geopotential height at 850&nbsp;hPa and upper-air temperature
+            matter most, pointing to high-pressure ridges and sinking air.
+          </li>
+          <li>
+            <strong>Sylhet is driven by vertical motion.</strong> Vertical
+            velocity at 850&nbsp;hPa is the top variable, so whether convection
+            is suppressed matters more than humidity there.
+          </li>
+          <li>
+            Khulna's predictions are the most sensitive to atmospheric
+            conditions, with the widest SHAP range.
+          </li>
+        </ul>
+      </section>
+
+      <section id="limitations">
+        <h2>Limitations &amp; future work</h2>
+        <h3>Limitations</h3>
+        <ul>
+          <li>
+            <strong>Small sample.</strong> One value per year gives few training
+            samples, which limits data-hungry models such as the MLP and GPR.
+          </li>
+          <li>
+            <strong>One season.</strong> Only the pre-monsoon (March&ndash;May)
+            is studied.
+          </li>
+          <li>
+            <strong>Reanalysis, not stations.</strong> ERA5 is complete and
+            consistent but is not a direct observation.
+          </li>
+          <li>
+            <strong>SHAP on original variables.</strong> SHAP was applied to the
+            mRMR-selected variables rather than the PCA features, to keep the
+            explanations physically meaningful.
+          </li>
+        </ul>
+        <h3>Future work</h3>
+        <ul>
+          <li>Extend the analysis to all seasons.</li>
+          <li>Add predictors such as soil moisture, land use and sea-surface temperature.</li>
+          <li>Use data augmentation or transfer learning to stabilise non-linear models.</li>
+          <li>Apply the framework to high-resolution climate projections to assess future heat-wave risk.</li>
+        </ul>
+      </section>
+
+      <section id="resources">
+        <h2>Resources</h2>
+        <div class="pub-links">
+          <a href="../files/report.pdf" target="_blank">[PDF]</a>
+          <a
+            href="https://github.com/nafiulislamnaim/Principal-Component-Analysis-and-Its-Applications.git"
+            target="_blank"
+            >[Code]</a
+          >
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
